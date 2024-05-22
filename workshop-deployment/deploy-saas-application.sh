@@ -2,6 +2,24 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
+function retry {
+  local n=1
+  local max=3
+  local delay=10
+  while true; do
+    "$@" && break || {
+      if [[ $n -lt $max ]]; then
+        ((n++))
+        echo "Command failed. Attempt $n/$max:"
+        sleep $delay;
+      else
+        echo "The command has failed after $n attempts."
+        exit 1
+      fi
+    }
+  done
+}
+
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 REPO_NAME="aws-saas-operations-workshop"
 REPO_DESCRIPTION="SaaS Operations architecture repository"
