@@ -2,11 +2,16 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
+# Per workshop variables
 WORKSHOP="SaaSOps"
-CDK_C9_STACK="SaaSOps-Cloud9Stack"
+REPONAME=$(echo $REPO_URL||sed 's#.*/##'|sed 's/\.git//')
+CDK_VERSION="2.142.1"
+
+# Static variables
 C9_ATTR_ARN_PARAMETER_NAME="/"$WORKSHOP"/Cloud9/AttrArn"
 C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP"/Cloud9/InstanceProfileName"
-CDK_VERSION="2.140.0"
+TARGET_USER="ec2-user"
+CDK_C9_STACK=$WORKSHOP"-Cloud9Stack"
 ARTILLERY_VERSION="2.0.7"
 TARGET_USER="ec2-user"
 
@@ -47,14 +52,14 @@ manage_workshop_stack() {
         run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
         run_ssm_command "rm -vf ~/.aws/credentials"
         run_ssm_command "npm install --force --global artillery@$ARTILLERY_VERSION"
-        run_ssm_command "cd ~/environment/aws-saas-operations-workshop/workshop-deployment/cloud9 && ./resize-cloud9-ebs-vol.sh"
-        run_ssm_command "cd ~/environment/aws-saas-operations-workshop/workshop-deployment && ./deploy-saas-application.sh"
+        run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment/cloud9 && ./resize-cloud9-ebs-vol.sh"
+        run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment && ./deploy-saas-application.sh"
     elif [ "$STACK_OPERATION" == "delete" ]; then
 
         if [[ "$C9_ID" != "None" ]]; then
             aws ec2 start-instances --instance-ids "$C9_ID"
             wait_for_instance_ssm "$C9_ID"
-            run_ssm_command "cd ~/environment/aws-saas-operations-workshop/workshop-deployment && ./destroy-saas-application.sh"
+            run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment && ./destroy-saas-application.sh"
         else
             cd ..
             ./destroy-saas-application.sh
