@@ -32,6 +32,7 @@ run_ssm_command() {
         --timeout-seconds 3600 \
         --comment "$comment" \
         --output text \
+        --cloud-watch-output-config "CloudWatchOutputEnabled=true" \
         --query "Command.CommandId")
 
     command_status="InProgress" # seed status var
