@@ -55,7 +55,7 @@ manage_workshop_stack() {
         run_ssm_command "rm -vf ~/.aws/credentials"
         run_ssm_command "npm install --force --global artillery@$ARTILLERY_VERSION"
         run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment/cloud9 && ./resize-cloud9-ebs-vol.sh"
-        run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment && ./deploy-saas-application.sh"
+        // run_ssm_command "cd ~/environment/$REPONAME/workshop-deployment && ./deploy-saas-application.sh"
     elif [ "$STACK_OPERATION" == "delete" ]; then
 
         if [[ "$C9_ID" != "None" ]]; then
