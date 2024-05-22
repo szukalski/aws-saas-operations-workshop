@@ -4,7 +4,7 @@
 
 # Per workshop variables
 WORKSHOP="SaaSOps"
-REPONAME=$(echo $REPO_URL||sed 's#.*/##'|sed 's/\.git//')
+REPONAME=$(echo $REPO_URL|sed 's#.*/##'|sed 's/\.git//')
 CDK_VERSION="2.142.1"
 
 # Static variables
