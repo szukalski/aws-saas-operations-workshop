@@ -10,6 +10,7 @@ CDK_VERSION="2.142.1"
 # Static variables
 C9_ATTR_ARN_PARAMETER_NAME="/"$WORKSHOP"/Cloud9/AttrArn"
 C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP"/Cloud9/InstanceProfileName"
+SSM_CLOUDWATCH=$WORKSHOP"/SSM-deployment"
 TARGET_USER="ec2-user"
 CDK_C9_STACK=$WORKSHOP"-Cloud9Stack"
 ARTILLERY_VERSION="2.0.7"
@@ -29,6 +30,7 @@ manage_workshop_stack() {
         cdk deploy $CDK_C9_STACK \
             --require-approval never
         echo "Done cdk deploy!"
+        aws logs create-log-group --log-group-name $SSM_CLOUDWATCH
     fi
 
     C9_ENV_ID=$(aws ssm get-parameter \
