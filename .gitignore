@@ -1,0 +1,7 @@
+.aws-sam
+.DS_Store
+.envrc
+.awsprofile*
+.env
+node_modules
+cdk.out
