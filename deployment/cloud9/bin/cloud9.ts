@@ -9,8 +9,8 @@ const region = process.env.CDK_DEFAULT_REGION;
 const env = { account, region };
 const participantAssumedRoleArn = process.env.PARTICIPANT_ASSUMED_ROLE_ARN;
 
-new Cloud9Stack(app, 'SaaSOps-Cloud9Stack', {
-  workshop: 'SaaSOps',
+new Cloud9Stack(app, 'WS-Cloud9Stack', {
+  workshop: 'Wiggleworm',
   ownerArn: participantAssumedRoleArn,
   env: env,
 });
