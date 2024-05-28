@@ -149,7 +149,7 @@ create_workshop() {
     run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
     run_ssm_command "rm -vf ~/.aws/credentials"
     run_ssm_command "cd ~/environment/$REPO_NAME/deployment/cloud9 && ./resize-cloud9-ebs-vol.sh"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./create-workshop.sh"
+    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./create-workshop.sh | tee .create-workshop.out"
 
 }
 
@@ -167,6 +167,6 @@ delete_workshop() {
     fi
 
     echo "Starting cdk destroy..."
-    cdk destroy --all --force
+    cdk destroy --all --force --context "workshop=$WORKSHOP_NAME"
     echo "Done cdk destroy!"
 }
