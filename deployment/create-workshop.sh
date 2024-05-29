@@ -43,6 +43,9 @@ echo "Installing isolation test packages"
 cd ${REPO_PATH}/App/isolation-test/
 retry npm install
 echo "Isolation test packages installed"
+echo "Installing artillery"
+retry npm install -g artillery
+echo "Installed artillery"
 echo "Dependencies installed"
 
 # Create CodeCommit repository
