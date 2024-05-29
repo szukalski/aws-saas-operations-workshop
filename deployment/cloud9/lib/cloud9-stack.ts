@@ -45,6 +45,7 @@ export class Cloud9Stack extends cdk.Stack {
       managedPolicies: [
         policy,
         ManagedPolicy.fromAwsManagedPolicyName("ReadOnlyAccess"),
+        ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentAdminPolicy"),
       ],
     });
 
