@@ -25,7 +25,7 @@ export class Cloud9Stack extends cdk.Stack {
       ;
     
     // Create the Cloud9 environment
-    this.c9 = new CfnEnvironmentEC2(this, 'Cloud9Stack', {
+    this.c9 = new CfnEnvironmentEC2(this, props.workshop+'-C9Instance', {
       imageId: props?.imageId ?? 'amazonlinux-2023-x86_64',
       instanceType: props?.instanceType ?? 'm5.large',
       description: props.workshop+" Cloud9",
@@ -34,14 +34,10 @@ export class Cloud9Stack extends cdk.Stack {
       automaticStopTimeMinutes: 180,
       tags: [{ key: 'Workshop', value: props.workshop }],
     });
-    new StringParameter(this, 'Cloud9AttrArn', {
-      parameterName: '/'+props.workshop+'/Cloud9/AttrArn',
-      stringValue: this.c9.attrArn,
-    });
     const policy = new ManagedPolicy(this, 'WsPolicy', {
       document: PolicyDocument.fromJson(JSON.parse(readFileSync(`${__dirname}/../../iam_policy.json`, 'utf-8'))),
     });
-    const cloud9Role = new Role(this, "Cloud9Role", {
+    const cloud9Role = new Role(this, "C9Role", {
       assumedBy: new CompositePrincipal(
         new ServicePrincipal('ec2.amazonaws.com'),
         new ServicePrincipal('ssm.amazonaws.com')
@@ -54,15 +50,13 @@ export class Cloud9Stack extends cdk.Stack {
 
     const cloud9InstanceProfile = new InstanceProfile(
       this,
-      "Cloud9InstanceProfile",
+      "C9InstanceProfile",
       {
         role: cloud9Role,
       }
     );
-
     const cloud9InstanceProfileName = '/'+props.workshop+'/Cloud9/InstanceProfileName';
-
-    new StringParameter(this, "cloud9InstanceProfileNameSSMParameter", {
+    new StringParameter(this, "C9InstanceProfileNameSSMParameter", {
       parameterName: cloud9InstanceProfileName,
       stringValue: cloud9InstanceProfile.instanceProfileName,
     });

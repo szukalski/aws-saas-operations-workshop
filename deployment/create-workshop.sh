@@ -232,7 +232,7 @@ cd ${REPO_PATH}/App/server/dashboards
 ./deploy.sh
 echo "Dashboards deployed"
 
-echo "SaaS application deployed"
+echo "Success - SaaS application deployed"
 
 echo "Creating tenants"
 
@@ -306,6 +306,6 @@ for tenant in ${TENANTS[@]}; do
         sleep 1
     done
 done
-echo "Tenants created"
+echo "Success - Tenants created"
 
 echo "Success - Workshop created!"

@@ -8,10 +8,8 @@
 WORKSHOP_NAME="SaaSOps"
 REPO_NAME=$(echo $REPO_URL|sed 's#.*/##'|sed 's/\.git//')
 CDK_VERSION="2.142.1"
-C9_ATTR_ARN_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/AttrArn"
 C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/InstanceProfileName"
 TARGET_USER="ec2-user"
-CDK_C9_STACK=$WORKSHOP_NAME"-C9Stack"
 
 ##  Helper functions
 # Try to run a command 3 times then timeout
@@ -106,12 +104,8 @@ replace_instance_profile() {
 
 # Get Cloud9 instance ID
 get_c9_id() {
-    C9_ENV_ID=$(aws ssm get-parameter \
-        --name "$C9_ATTR_ARN_PARAMETER_NAME" \
-        --output text \
-        --query "Parameter.Value"|cut -d ":" -f 7)
     C9_ID=$(aws ec2 describe-instances \
-        --filter "Name=tag:aws:cloud9:environment,Values=$C9_ENV_ID" \
+        --filter "Name=tag:Workshop,Values=$WORKSHOP_NAME" \
         --query 'Reservations[].Instances[].{Instance:InstanceId}' \
         --output text)
 }
@@ -127,7 +121,7 @@ bootstrap_cdk() {
 create_workshop() {
     bootstrap_cdk
     echo "Starting Cloud9 cdk deploy..."
-    cdk deploy $CDK_C9_STACK \
+    cdk deploy --all \
         --require-approval never \
         --context "workshop=$WORKSHOP_NAME"
     echo "Done Cloud9 cdk deploy!"
