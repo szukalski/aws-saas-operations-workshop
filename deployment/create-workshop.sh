@@ -223,6 +223,7 @@ while true; do
     if [[ "${deploymentstatus}" == "Succeeded" ]]; then
         break
     fi
+    echo "Waiting for pipeline execution"
     sleep 30
 done
 echo "Landing UI configured"
