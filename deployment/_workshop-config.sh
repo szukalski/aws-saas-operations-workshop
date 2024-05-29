@@ -8,7 +8,8 @@
 WORKSHOP_NAME="SaaSOps"
 REPO_NAME=$(echo $REPO_URL|sed 's#.*/##'|sed 's/\.git//')
 CDK_VERSION="2.142.1"
-C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/InstanceProfileName"
+BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/BuildInstanceProfileName"
+PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/ParticipantInstanceProfileName"
 TARGET_USER="ec2-user"
 
 ##  Helper functions
@@ -132,7 +133,7 @@ create_workshop() {
     echo $C9_ID "ready"
 
     C9_INSTANCE_PROFILE_NAME=$(aws ssm get-parameter \
-        --name "$C9_INSTANCE_PROFILE_PARAMETER_NAME" \
+        --name "$BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME" \
         --output text \
         --query "Parameter.Value")
     replace_instance_profile
@@ -143,6 +144,11 @@ create_workshop() {
     run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./configure-logs.sh"
     run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./create-workshop.sh | tee .workshop.out"
 
+    C9_INSTANCE_PROFILE_NAME=$(aws ssm get-parameter \
+        --name "$PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME" \
+        --output text \
+        --query "Parameter.Value")
+    replace_instance_profile
 }
 
 delete_workshop() {

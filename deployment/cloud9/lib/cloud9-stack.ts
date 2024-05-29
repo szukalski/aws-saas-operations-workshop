@@ -34,34 +34,54 @@ export class Cloud9Stack extends cdk.Stack {
       automaticStopTimeMinutes: 180,
       tags: [{ key: 'Workshop', value: props.workshop }],
     });
-    const policy = new ManagedPolicy(this, 'WsPolicy', {
+
+    const participantPolicy = new ManagedPolicy(this, 'WsPolicy', {
       document: PolicyDocument.fromJson(JSON.parse(readFileSync(`${__dirname}/../../iam_policy.json`, 'utf-8'))),
     });
-    const cloud9Role = new Role(this, "C9Role", {
+    const participantCloud9Role = new Role(this, "ParticipantC9Role", {
       assumedBy: new CompositePrincipal(
         new ServicePrincipal('ec2.amazonaws.com'),
         new ServicePrincipal('ssm.amazonaws.com')
       ),
       managedPolicies: [
-        policy,
+        participantPolicy,
         ManagedPolicy.fromAwsManagedPolicyName("ReadOnlyAccess"),
         ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentAdminPolicy"),
       ],
     });
-
-    const cloud9InstanceProfile = new InstanceProfile(
+    const participantCloud9InstanceProfile = new InstanceProfile(
       this,
-      "C9InstanceProfile",
+      "ParticipantC9RoleC9InstanceProfile",
       {
-        role: cloud9Role,
+        role: participantCloud9Role,
       }
     );
-    const cloud9InstanceProfileName = '/'+props.workshop+'/Cloud9/InstanceProfileName';
-    new StringParameter(this, "C9InstanceProfileNameSSMParameter", {
-      parameterName: cloud9InstanceProfileName,
-      stringValue: cloud9InstanceProfile.instanceProfileName,
+    const participantCloud9InstanceProfileName = '/'+props.workshop+'/Cloud9/ParticipantInstanceProfileName';
+    new StringParameter(this, "ParticipantC9RoleC9InstanceProfileNameSSMParameter", {
+      parameterName: participantCloud9InstanceProfileName,
+      stringValue: participantCloud9InstanceProfile.instanceProfileName,
     });
     
-    
+    const buildCloud9Role = new Role(this, "BuildC9Role", {
+      assumedBy: new CompositePrincipal(
+        new ServicePrincipal('ec2.amazonaws.com'),
+        new ServicePrincipal('ssm.amazonaws.com')
+      ),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentAdminPolicy"),
+      ],
+    });
+    const buildCloud9InstanceProfile = new InstanceProfile(
+      this,
+      "BuildC9RoleC9InstanceProfile",
+      {
+        role: buildCloud9Role,
+      }
+    );
+    const buildCloud9InstanceProfileName = '/'+props.workshop+'/Cloud9/BuildInstanceProfileName';
+    new StringParameter(this, "BuildC9RoleC9InstanceProfileNameSSMParameter", {
+      parameterName: buildCloud9InstanceProfileName,
+      stringValue: buildCloud9InstanceProfile.instanceProfileName,
+    }); 
   }
 }
