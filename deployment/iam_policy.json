@@ -25,6 +25,7 @@
 				"cognito-idp:AdminCreateUser",
 				"cognito-idp:AdminDeleteUser",
 				"cognito-idp:AdminSetUserPassword",
+				"dynamodb:CreateTable",
 				"ec2:ModifyVolume",
 				"glue:BatchCreatePartition",
 				"glue:UpdateTable",
