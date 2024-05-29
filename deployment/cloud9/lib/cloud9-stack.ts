@@ -68,7 +68,7 @@ export class Cloud9Stack extends cdk.Stack {
         new ServicePrincipal('ssm.amazonaws.com')
       ),
       managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentAdminPolicy"),
+        ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
       ],
     });
     const buildCloud9InstanceProfile = new InstanceProfile(
