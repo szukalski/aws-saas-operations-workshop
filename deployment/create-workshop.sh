@@ -211,7 +211,7 @@ export const environment = {
 };
 EoF
 retry npm install
-npm build
+npm run build
 aws s3 sync --delete --cache-control no-store dist "s3://${LANDING_APP_SITE_BUCKET}"
 if [[ $? -ne 0 ]]
 then
