@@ -163,7 +163,8 @@ delete_workshop() {
         ./delete-workshop.sh -s
         cd cloud9
     fi
-
+    
+    aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
     echo "Starting cdk destroy..."
     cdk destroy --all --force --context "workshop=$WORKSHOP_NAME"
     echo "Done cdk destroy!"
