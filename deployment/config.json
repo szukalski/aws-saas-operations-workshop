@@ -1,13 +1,13 @@
 {
 	"agent": {
-		"run_as_user": "cwagent"
+		"run_as_user": "root"
 	},
 	"logs": {
 		"logs_collected": {
 			"files": {
 				"collect_list": [
 					{
-						"file_path": "/home/ec2-user/aws-saas-operations-workshop/deployment/.workshop.out",
+						"file_path": "/home/ec2-user/environment/aws-saas-operations-workshop/deployment/.workshop.out",
 						"log_group_class": "STANDARD",
 						"log_group_name": "/SaaSOps/Workshop",
 						"log_stream_name": "{instance_id}",
