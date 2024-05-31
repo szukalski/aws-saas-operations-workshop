@@ -3,5 +3,4 @@
 # SPDX-License-Identifier: MIT-0
 
 sudo yum install amazon-cloudwatch-agent -y
-
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:config.json

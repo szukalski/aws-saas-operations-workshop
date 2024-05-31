@@ -4,8 +4,8 @@
 
 ## Import workshop configuration
 # This contains the create_workshop() and delete_workshop() functions
-if [ -f ./_workshop-config.sh ]; then
-    source ./_workshop-config.sh
+if [ -f ./_workshop-conf.sh ]; then
+    source ./_workshop-conf.sh
 fi
 
 ## Define how to manage your workshop stack

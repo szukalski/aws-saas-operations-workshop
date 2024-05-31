@@ -2,17 +2,18 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-## Defines workshop configuration shared amongst various scripts
+# Break when all background jobs are done
+function wait_for_background_jobs {
+    while true; do
+    sleep 5
+    jobs_running=($(jobs -l | grep Running | awk '{print $2}'))
+    if [ ${#jobs_running[@]} -eq 0 ]; then
+        break
+    fi
+    echo "Jobs running: ${jobs_running[@]}"
+    done
+}
 
-## Variables for the workshop
-WORKSHOP_NAME="SaaSOps"
-REPO_NAME=$(echo $REPO_URL|sed 's#.*/##'|sed 's/\.git//')
-CDK_VERSION="2.142.1"
-BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/BuildInstanceProfileName"
-PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/ParticipantInstanceProfileName"
-TARGET_USER="ec2-user"
-
-##  Helper functions
 # Try to run a command 3 times then timeout
 function retry {
   local n=1
@@ -67,11 +68,17 @@ run_ssm_command() {
 # Wait for an EC2 instance to become available and for it to be online in SSM
 wait_for_instance_ssm() {
     INSTANCE_ID="$1"
+    COUNT=1
+    MAX_COUNT=12 # Wait for 12*15s=180s
     echo "Waiting for instance $INSTANCE_ID to become available"
     aws ec2 wait instance-status-ok --instance-ids "$INSTANCE_ID"
     echo "Instance $INSTANCE_ID is available"
     ssm_status=$(aws ssm describe-instance-information --filters "Key=InstanceIds,Values=$INSTANCE_ID" --query 'InstanceInformationList[].PingStatus' --output text)
     while [[ "$ssm_status" != "Online" ]]; do
+        if [[ $COUNT > $MAX_COUNT ]]; then
+            echo "Instance $INSTANCE_ID is not online in SSM for "$MAX_COUNT" attempts. Exiting."
+            exit 1
+        fi
         echo "Instance $INSTANCE_ID is not online in SSM yet. Waiting 15 seconds"
         sleep 15
         ssm_status=$(aws ssm describe-instance-information --filters "Key=InstanceIds, Values=$INSTANCE_ID" --query 'InstanceInformationList[].PingStatus' --output text)
@@ -82,6 +89,10 @@ wait_for_instance_ssm() {
 # Replace an instance profile on an EC2 instance
 replace_instance_profile() {
     echo "Replacing instance profile"
+    C9_INSTANCE_PROFILE_NAME=$(aws ssm get-parameter \
+        --name "$1" \
+        --output text \
+        --query "Parameter.Value")
     association_id=$(aws ec2 describe-iam-instance-profile-associations --filter "Name=instance-id,Values=$C9_ID" --query 'IamInstanceProfileAssociations[].AssociationId' --output text)
     if [ ! association_id == "" ]; then
         aws ec2 disassociate-iam-instance-profile --association-id $association_id
@@ -117,55 +128,4 @@ bootstrap_cdk() {
     cd cloud9
     npm install
     cdk bootstrap
-}
-
-create_workshop() {
-    bootstrap_cdk
-    echo "Starting Cloud9 cdk deploy..."
-    cdk deploy --all --require-approval never --context "workshop=$WORKSHOP_NAME"
-    echo "Done Cloud9 cdk deploy!"
-
-    get_c9_id
-
-    echo "Waiting for " $C9_ID
-    aws ec2 start-instances --instance-ids "$C9_ID"
-    aws ec2 wait instance-status-ok --instance-ids "$C9_ID"
-    echo $C9_ID "ready"
-
-    C9_INSTANCE_PROFILE_NAME=$(aws ssm get-parameter \
-        --name "$BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME" \
-        --output text \
-        --query "Parameter.Value")
-    replace_instance_profile
-
-    run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
-    run_ssm_command "rm -vf ~/.aws/credentials"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment/cloud9 && ./resize-cloud9-ebs-vol.sh"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./configure-logs.sh"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./create-workshop.sh | tee .workshop.out"
-
-    C9_INSTANCE_PROFILE_NAME=$(aws ssm get-parameter \
-        --name "$PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME" \
-        --output text \
-        --query "Parameter.Value")
-    replace_instance_profile
-}
-
-delete_workshop() {
-    bootstrap_cdk
-    get_c9_id
-    if [[ "$C9_ID" != "None" ]]; then
-        aws ec2 start-instances --instance-ids "$C9_ID"
-        wait_for_instance_ssm "$C9_ID"
-        run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./delete-workshop.sh -s | tee .workshop.out"
-    else
-        cd ..
-        ./delete-workshop.sh -s
-        cd cloud9
-    fi
-    
-    aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
-    echo "Starting cdk destroy..."
-    cdk destroy --all --force --context "workshop=$WORKSHOP_NAME"
-    echo "Done cdk destroy!"
 }
