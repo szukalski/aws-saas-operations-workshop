@@ -237,6 +237,7 @@ cd ${REPO_PATH}/App/server/dashboards
 echo "Dashboards deployed"
 
 echo "Success - SaaS application deployed"
+exit 0
 
 echo "Creating tenants"
 
