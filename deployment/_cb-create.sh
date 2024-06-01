@@ -15,9 +15,8 @@ create_workshop() {
     echo $C9_ID "ready"
 
     replace_instance_profile $BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME
-
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./_c9-init.sh  | tee .ws-init.log"
     run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
+    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./_c9-init.sh  | tee .ws-init.log"
     run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./_c9-create.sh | tee .ws-create.log"
 
     replace_instance_profile $PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME
