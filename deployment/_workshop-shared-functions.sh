@@ -128,4 +128,5 @@ bootstrap_cdk() {
     cd cloud9
     npm install
     cdk bootstrap
+    cd ..
 }

@@ -4,6 +4,7 @@
 
 create_workshop() {
     bootstrap_cdk
+    cd cloud9
     echo "Starting Cloud9 cdk deploy..."
     cdk deploy --all --require-approval never --context "workshop=$WORKSHOP_NAME"
     echo "Done Cloud9 cdk deploy!"
