@@ -93,6 +93,119 @@ create_bootstrap() {
     echo "Application deployed"
 }
 
+# Configuring admin UI
+deploy_admin_ui() {
+    echo "Configuring admin UI"
+    if ! aws s3 ls "s3://${ADMIN_SITE_BUCKET}"
+    then
+        echo "Error! S3 Bucket: ${ADMIN_SITE_BUCKET} not readable"
+        exit 1
+    fi
+    cd ${REPO_PATH}/App/clients/Admin
+    cat <<EoF >./src/environments/environment.prod.ts
+export const environment = {
+    production: true,
+    apiUrl: '${ADMIN_APIGATEWAYURL}',
+};
+EoF
+    cat <<EoF >./src/environments/environment.ts
+export const environment = {
+    production: false,
+    apiUrl: '${ADMIN_APIGATEWAYURL}',
+};
+EoF
+    cat <<EoF >./src/aws-exports.ts
+const awsmobile = {
+    "aws_project_region": "${REGION}",
+    "aws_cognito_region": "${REGION}",
+    "aws_user_pools_id": "${ADMIN_USERPOOLID}",
+    "aws_user_pools_web_client_id": "${ADMIN_APPCLIENTID}",
+};
+export default awsmobile;
+EoF
+    retry npm install
+    npm run build
+    aws s3 sync --delete --cache-control no-store dist "s3://${ADMIN_SITE_BUCKET}"
+    if [[ $? -ne 0 ]]
+    then
+        echo "Error:sync ${ADMIN_SITE_BUCKET}"
+        exit 1
+    fi
+    echo "Admin UI configured"
+}
+
+# Configuring application UI
+deploy_application_ui() {
+    echo "Configuring application UI"
+    if ! aws s3 ls "s3://${APP_SITE_BUCKET}"
+    then
+        echo "Error! S3 Bucket: ${APP_SITE_BUCKET} not readable"
+        exit 1
+    fi  
+    cd ${REPO_PATH}/App/clients/Application
+    cat <<EoF >./src/environments/environment.prod.ts
+export const environment = {
+    production: true,
+    regApiGatewayUrl: '${ADMIN_APIGATEWAYURL}',
+};
+EoF
+    cat <<EoF >./src/environments/environment.ts
+export const environment = {
+    production: true,
+    regApiGatewayUrl: '${ADMIN_APIGATEWAYURL}',
+};
+EoF
+    retry npm install
+    npm run build
+    aws s3 sync --delete --cache-control no-store dist "s3://${APP_SITE_BUCKET}"
+    if [[ $? -ne 0 ]]
+    then
+        echo "Error:sync ${APP_SITE_BUCKET}"
+        exit 1
+    fi
+    echo "Application UI configured"
+}
+
+# Configuring landing UI
+deploy_landing_ui() {
+    echo "Configuring landing UI"
+    if ! aws s3 ls "s3://${LANDING_APP_SITE_BUCKET}"
+    then
+        echo "Error! S3 Bucket: ${LANDING_APP_SITE_BUCKET} not readable"
+        exit 1
+    fi
+    cd ${REPO_PATH}/App/clients/Landing
+    cat <<EoF >./src/environments/environment.prod.ts
+export const environment = {
+    production: true,
+    apiGatewayUrl: '${ADMIN_APIGATEWAYURL}'
+};
+EoF
+    cat <<EoF >./src/environments/environment.ts
+export const environment = {
+    production: false,
+    apiGatewayUrl: '${ADMIN_APIGATEWAYURL}'
+};
+EoF
+    retry npm install
+    npm run build
+    aws s3 sync --delete --cache-control no-store dist "s3://${LANDING_APP_SITE_BUCKET}"
+    if [[ $? -ne 0 ]]
+    then
+        echo "Error:sync $LANDING_APP_SITE_BUCKET"
+        exit 1
+    fi
+    while true; do
+        deploymentstatus=$(aws codepipeline get-pipeline-execution --pipeline-name saas-operations-pipeline --pipeline-execution-id ${PIPELINE_EXECUTION_ID} | jq -r '.pipelineExecution.status')
+        if [[ "${deploymentstatus}" == "Succeeded" ]]; then
+            break
+        fi
+        echo "Waiting for pipeline execution"
+        sleep 30
+    done
+    echo "Landing UI configured"
+}
+
 # Deploy dashboards
 deploy_dashboards() {
     echo "Deploying dashboards"
@@ -172,6 +285,9 @@ install_dependencies
 create_codecommit
 create_tenant_pipeline &
 create_bootstrap &
+deploy_admin_ui &
+deploy_application_ui &
+deploy_landing_ui &
 deploy_dashboards &
 wait_for_background_jobs
 execute_pipeline
