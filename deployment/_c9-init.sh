@@ -2,7 +2,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-$REPO_URL=$1
+REPO_URL=$1
 source ./_workshop-conf.sh
 
 rm -vf ~/.aws/credentials
