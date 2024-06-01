@@ -2,13 +2,14 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
+REPO_URL=$1
 source ./_workshop-conf.sh
 
 ## Variables
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 REPO_DESCRIPTION="SaaS Operations architecture repository"
 REPO_PATH="/home/ec2-user/environment/${REPO_NAME}"
-REPO_URL="codecommit::${REGION}://${REPO_NAME}"
+CC_REPO_URL="codecommit::${REGION}://${REPO_NAME}"
 
 ## Dependencies
 install_dependencies() {
@@ -40,10 +41,10 @@ create_codecommit() {
         CREATE_REPO=$(aws codecommit create-repository --repository-name ${REPO_NAME} --repository-description "${REPO_DESCRIPTION}")
         echo "${CREATE_REPO}"
     fi
-    if ! git remote add cc "${REPO_URL}"
+    if ! git remote add cc "${CC_REPO_URL}"
     then
         echo "Setting url to remote cc"
-        git remote set-url cc "${REPO_URL}"
+        git remote set-url cc "${CC_REPO_URL}"
     fi
     git push cc "$(git branch --show-current)":main
     echo "CodeCommit repository created"
@@ -91,6 +92,22 @@ create_bootstrap() {
         exit 1
     fi
     echo "Application deployed"
+}
+
+execute_pipeline() {
+    # Start CI/CD pipeline which loads tenant stack
+    echo "Starting CI/CD pipeline"
+    PIPELINE_EXECUTION_ID=$(aws codepipeline start-pipeline-execution --name saas-operations-pipeline | jq -r '.pipelineExecutionId')
+    ADMIN_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminAppBucket'].Value" --output text)
+    APP_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AppBucket'].Value" --output text)
+    LANDING_APP_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-LandingAppBucket'].Value" --output text)
+    ADMIN_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminAppSite'].Value" --output text)
+    APP_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-ApplicationSite'].Value" --output text)
+    LANDING_APP_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-LandingApplicationSite'].Value" --output text)
+    ADMIN_APPCLIENTID=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminUserPoolClientId'].Value" --output text)
+    ADMIN_USERPOOLID=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminUserPoolId'].Value" --output text)
+    ADMIN_APIGATEWAYURL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminApiGatewayUrl'].Value" --output text)
+    echo "Finished CI/CD pipeline"
 }
 
 # Configuring admin UI
@@ -269,22 +286,6 @@ create_tenant_users() {
         done
     done
     echo "Tenant users created"
-}
-
-execute_pipeline() {
-    # Start CI/CD pipeline which loads tenant stack
-    echo "Starting CI/CD pipeline"
-    PIPELINE_EXECUTION_ID=$(aws codepipeline start-pipeline-execution --name saas-operations-pipeline | jq -r '.pipelineExecutionId')
-    ADMIN_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminAppBucket'].Value" --output text)
-    APP_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AppBucket'].Value" --output text)
-    LANDING_APP_SITE_BUCKET=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-LandingAppBucket'].Value" --output text)
-    ADMIN_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminAppSite'].Value" --output text)
-    APP_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-ApplicationSite'].Value" --output text)
-    LANDING_APP_SITE_URL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-LandingApplicationSite'].Value" --output text)
-    ADMIN_APPCLIENTID=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminUserPoolClientId'].Value" --output text)
-    ADMIN_USERPOOLID=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminUserPoolId'].Value" --output text)
-    ADMIN_APIGATEWAYURL=$(aws cloudformation list-exports --query "Exports[?Name=='SaaS-Operations-AdminApiGatewayUrl'].Value" --output text)
-    echo "Finished CI/CD pipeline"
 }
 
 ## Create SaaS application
