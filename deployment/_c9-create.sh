@@ -291,15 +291,15 @@ execute_pipeline() {
 echo "Creating workshop"
 install_dependencies
 create_codecommit
-create_tenant_pipeline &
-create_bootstrap &
-wait_for_background_jobs
+create_tenant_pipeline 
+create_bootstrap 
+#wait_for_background_jobs
 execute_pipeline
-deploy_admin_ui &
-deploy_application_ui &
-deploy_landing_ui &
-deploy_dashboards &
-wait_for_background_jobs
+deploy_admin_ui 
+deploy_application_ui 
+deploy_landing_ui 
+deploy_dashboards 
+#wait_for_background_jobs
 create_tenants
 create_tenant_users
 echo "Success - Workshop created!"
