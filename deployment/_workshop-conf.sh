@@ -14,7 +14,7 @@ PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/Partici
 TARGET_USER="ec2-user"
 
 ## Functions
-FUNCTIONS=( _workshop-shared-functions.sh _cb-create.sh _cb-delete.sh )
+FUNCTIONS=( _workshop-shared-functions.sh )
 for FUNCTION in "${FUNCTIONS[@]}"; do
     if [ -f $FUNCTION ]; then
         source $FUNCTION

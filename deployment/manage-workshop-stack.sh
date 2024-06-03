@@ -4,9 +4,14 @@
 
 ## Import workshop configuration
 # This contains the create_workshop() and delete_workshop() functions
-if [ -f ./_workshop-conf.sh ]; then
-    source ./_workshop-conf.sh
-fi
+FUNCTIONS=( _workshop-conf.sh _manage-workshop-stack.sh )
+for FUNCTION in "${FUNCTIONS[@]}"; do
+    if [ -f $FUNCTION ]; then
+        source $FUNCTION
+    else
+        echo "ERROR: $FUNCTION not found"
+    fi
+done
 
 ## Define how to manage your workshop stack
 # The 

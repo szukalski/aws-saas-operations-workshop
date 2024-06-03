@@ -7,7 +7,7 @@
 
 echo "Deploying workshop resources..."
 
-STACK_NAME="SaaSOps"
+STACK_NAME="SaaSOps"${1:-""}
 REPO_URL="https://github.com/szukalski/aws-saas-operations-workshop.git"
 REPO_BRANCH_NAME="main"
 PARTICIPANT_ASSUMED_ROLE_ARN="$(aws sts get-caller-identity --query 'Arn' --output text)"
