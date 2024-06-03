@@ -93,7 +93,7 @@ delete_codecommit_repo() {
     if [[ -n "${repo}" ]]; then
         aws codecommit delete-repository --repository-name "$REPO_NAME"
     else
-        echo "repo \"$REPO_NAME\" does not exist..."
+        echo "Repo \"$REPO_NAME\" does not exist..."
     fi
     echo "Repo \"$REPO_NAME\" deleted."
 }
@@ -110,16 +110,8 @@ delete_log_groups() {
 
         log_groups=$(echo "$response" | jq -r '.logGroups[].logGroupName | select(. | test("^/aws/lambda/stack-*|^/aws/lambda/saas-operations-*|^/aws/api-gateway/access-logs-saas-operations-*|^/aws/lambda/saasOpsWorkshop-*|^saas-operations-pipeline-*|/aws/codebuild/Build45A36621-*|API-Gateway-Execution-Logs_*"))')
         for i in $log_groups; do
-            if [[ -z "${skip_flag}" ]]; then
-                read -p "Delete log group with name $i [Y/n] " -n 1 -r
-            fi
-
-            if [[ $REPLY =~ ^[n]$ ]]; then
-                echo "NOT deleting log group $i."
-            else
-                echo "deleting log group with name $i..."
-                aws logs delete-log-group --log-group-name "$i"
-            fi
+            echo "Deleting log group $i..."
+            aws logs delete-log-group --log-group-name "$i"
         done
 
         next_token=$(echo "$response" | jq '.NextToken')

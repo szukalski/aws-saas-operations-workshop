@@ -12,6 +12,11 @@ REPO_DESCRIPTION="SaaS Operations architecture repository"
 REPO_PATH="/home/ec2-user/environment/${REPO_NAME}"
 CC_REPO_URL="codecommit::${REGION}://${REPO_NAME}"
 
+## Init
+rm -vf ~/.aws/credentials
+cd ~/environment/$REPO_NAME/deployment && ./configure-logs.sh
+cd ~/environment/$REPO_NAME/deployment/cloud9 && ./resize-cloud9-ebs-vol.sh
+
 ## Create SaaS application
 echo "Creating workshop"
 install_dependencies

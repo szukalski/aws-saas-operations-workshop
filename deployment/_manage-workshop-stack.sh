@@ -17,7 +17,7 @@ create_workshop() {
 
     replace_instance_profile $BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME
     run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./c9-init.sh $REPO_URL | tee .ws-init.log"
+    #run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./c9-init.sh $REPO_URL | tee .ws-init.log"
     run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./c9-create.sh $REPO_URL | tee .ws-create.log"
 
     replace_instance_profile $PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME
@@ -25,9 +25,11 @@ create_workshop() {
 
 delete_workshop() {
     get_c9_id
-    ./delete-workshop.sh
+    ./c9-delete.sh
     
     aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
+
+    bootstrap_cdk
     cd cloud9
     echo "Starting cdk destroy..."
     cdk destroy --all --force --context "workshop=$WORKSHOP_NAME"
