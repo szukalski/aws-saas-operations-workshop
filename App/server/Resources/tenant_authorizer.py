@@ -99,6 +99,7 @@ def lambda_handler(event, context):
     #   Generate STS credentials to be used for FGAC
     
     provider_name = response["iss"][8:] # get rid of https://
+    logger.info("Provider name: "+provider_name)
     logins = {}
     logins[provider_name] = jwt_bearer_token
     logger.info("Logins: "+logins)
