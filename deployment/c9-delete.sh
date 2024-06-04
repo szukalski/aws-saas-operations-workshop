@@ -16,7 +16,7 @@ done
 delete_tenant_stacks &
 delete_buckets
 for STACK in "${STACKS_1[@]}"; do
-    delete_stack "${STACK}" &
+    delete_stack "${STACK}"
 done
 for STACK in "${STACKS_2[@]}"; do
     delete_stack "${STACK}" &
