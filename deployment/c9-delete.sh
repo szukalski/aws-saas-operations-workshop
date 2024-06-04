@@ -6,7 +6,8 @@ source ./_c9-delete.sh
 echo "Deleting workshop resources"
 
 TRAILS=( "saas-ops-ddb-access-trails" "saas-ops-management-trails" )
-STACKS=( "saas-operations-controlplane" "saas-operations-pipeline" "saasOpsWorkshop-saasOperationsDashboard")
+STACKS_1=( "saas-operations-controlplane")
+STACKS_2=( "saas-operations-pipeline" "saasOpsWorkshop-saasOperationsDashboard")
 CODECOMMIT_REPOS=( "saas-operations-workshop" )
 
 for TRAIL in "${TRAILS[@]}"; do
@@ -14,7 +15,10 @@ for TRAIL in "${TRAILS[@]}"; do
 done
 delete_tenant_stacks &
 delete_buckets
-for STACK in "${STACKS[@]}"; do
+for STACK in "${STACKS_1[@]}"; do
+    delete_stack "${STACK}" &
+done
+for STACK in "${STACKS_2[@]}"; do
     delete_stack "${STACK}" &
 done
 for REPO in "${CODECOMMIT_REPOS[@]}"; do
