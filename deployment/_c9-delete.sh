@@ -10,6 +10,7 @@ stop_cloudtrail() {
     fi
     aws cloudtrail stop-logging --name "${1}"
     echo "CloudTrail ${1} stopped."
+    aws cloudtrail delete-trail --name "${1}"
 }
 
 delete_stack() {
@@ -135,25 +136,17 @@ delete_user_pools() {
 
         pool_ids=$(echo "$response" | jq -r '.UserPools[] | select(.Name | test("^.*-SaaSOperationsUserPool$")) |.Id')
         for i in $pool_ids; do
-            if [[ -z "${skip_flag}" ]]; then
-                read -p "Delete user pool with name $i [Y/n] " -n 1 -r
-            fi
+            echo "deleting user pool with name $i..."
+            echo "getting pool domain..."
+            pool_domain=$(aws cognito-idp describe-user-pool --user-pool-id "$i" | jq -r '.UserPool.Domain')
 
-            if [[ $REPLY =~ ^[n]$ ]]; then
-                echo "NOT deleting user pool $i."
-            else
-                echo "deleting user pool with name $i..."
-                echo "getting pool domain..."
-                pool_domain=$(aws cognito-idp describe-user-pool --user-pool-id "$i" | jq -r '.UserPool.Domain')
+            echo "deleting pool domain $pool_domain..."
+            aws cognito-idp delete-user-pool-domain \
+                --user-pool-id "$i" \
+                --domain "$pool_domain"
 
-                echo "deleting pool domain $pool_domain..."
-                aws cognito-idp delete-user-pool-domain \
-                    --user-pool-id "$i" \
-                    --domain "$pool_domain"
-
-                echo "deleting pool $i..."
-                aws cognito-idp delete-user-pool --user-pool-id "$i"
-            fi
+            echo "deleting pool $i..."
+            aws cognito-idp delete-user-pool --user-pool-id "$i"
         done
 
         next_token=$(echo "$response" | jq -r '.NextToken')
@@ -162,14 +155,6 @@ delete_user_pools() {
             break
         fi
     done
-}
-
-delete_workshop_stacks() {
-    echo "Deleting workshop stacks..."
-    for i in $(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[?contains(StackName,'saasOpsWorkshop')].StackName" --output text); do
-        delete_stack ${i}
-    done
-    echo "Workshop stacks deleted."
 }
 
 delete_api_keys() {

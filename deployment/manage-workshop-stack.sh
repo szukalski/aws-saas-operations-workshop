@@ -13,8 +13,7 @@ for FUNCTION in "${FUNCTIONS[@]}"; do
     fi
 done
 
-## Define how to manage your workshop stack
-# The 
+## Calls the create and delete operations
 manage_workshop_stack() {
     STACK_OPERATION=$(echo "$1" | tr '[:upper:]' '[:lower:]')
     if [[ "$STACK_OPERATION" == "create" || "$STACK_OPERATION" == "update" ]]; then
