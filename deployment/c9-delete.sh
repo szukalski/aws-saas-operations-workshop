@@ -14,6 +14,7 @@ for TRAIL in "${TRAILS[@]}"; do
     stop_cloudtrail "${TRAIL}"
 done
 delete_tenant_stacks &
+wait_for_background_jobs
 delete_buckets
 for STACK in "${STACKS_1[@]}"; do
     delete_stack "${STACK}"
