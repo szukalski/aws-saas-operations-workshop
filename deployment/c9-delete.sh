@@ -13,8 +13,7 @@ CODECOMMIT_REPOS=( "saas-operations-workshop" )
 for TRAIL in "${TRAILS[@]}"; do
     stop_cloudtrail "${TRAIL}"
 done
-delete_tenant_stacks &
-wait_for_background_jobs
+delete_tenant_stacks
 delete_buckets
 for STACK in "${STACKS_1[@]}"; do
     delete_stack "${STACK}"
@@ -22,6 +21,7 @@ done
 for STACK in "${STACKS_2[@]}"; do
     delete_stack "${STACK}" &
 done
+wait_for_background_jobs
 for REPO in "${CODECOMMIT_REPOS[@]}"; do
     delete_codecommit_repo "${REPO}" &
 done

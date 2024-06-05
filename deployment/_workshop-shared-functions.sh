@@ -3,19 +3,19 @@
 # SPDX-License-Identifier: MIT-0
 
 # Break when all background jobs are done
-function wait_for_background_jobs {
+wait_for_background_jobs {
     while true; do
-    sleep 5
-    jobs_running=($(jobs -l | grep Running | awk '{print $2}'))
-    if [ ${#jobs_running[@]} -eq 0 ]; then
-        break
-    fi
-    echo "Jobs running: ${jobs_running[@]}"
+        sleep 5
+        jobs_running=($(jobs -l | grep Running | awk '{print $2}'))
+        if [ ${#jobs_running[@]} -eq 0 ]; then
+            break
+        fi
+        echo "Jobs running: ${jobs_running[@]}"
     done
 }
 
 # Try to run a command 3 times then timeout
-function retry {
+retry {
   local n=1
   local max=3
   local delay=10
