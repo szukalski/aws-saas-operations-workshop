@@ -110,7 +110,7 @@ Resources:
               ForAnyValue:StringLike:
                 "cognito-identity.amazonaws.com:amr": authenticated
               StringEquals:
-                "aws:PrincipalAccount": !Sub ${AWS::AccountId}
+                "cognito-identity.amazonaws.com:aud": !Ref CognitoIdentityPool
       Policies:      
         - PolicyName: authenticated-pooled-user-policy
           PolicyDocument:
