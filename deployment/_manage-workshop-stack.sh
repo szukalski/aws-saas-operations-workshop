@@ -34,7 +34,7 @@ delete_workshop() {
     for TRAIL in "${TRAILS[@]}"; do
         stop_cloudtrail "${TRAIL}"
     done
-    delete_tenant_stacks &
+    delete_tenant_stacks
     delete_buckets
     for STACK in "${STACKS_1[@]}"; do
         delete_stack "${STACK}"
