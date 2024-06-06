@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT-0
 
 # Break when all background jobs are done
-wait_for_background_jobs {
+wait_for_background_jobs() {
     echo "Waiting for background jobs to finish"
     while true; do
         sleep 5
@@ -16,7 +16,7 @@ wait_for_background_jobs {
 }
 
 # Try to run a command 3 times then timeout
-retry {
+retry() {
   local n=1
   local max=3
   local delay=10
