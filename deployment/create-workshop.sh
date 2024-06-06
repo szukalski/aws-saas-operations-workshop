@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT-0
 
 REPO_URL=$1
-source ./_workshop-conf.sh
+source ./_workshop-conf.sh # REPO_NAME comes from here
 source ./_workshop-shared-functions.sh
 source ./_create-workshop.sh
 
@@ -23,8 +23,7 @@ echo "Creating workshop"
 install_dependencies
 create_codecommit
 create_tenant_pipeline 
-create_bootstrap 
-#wait_for_background_jobs
+create_bootstrap
 execute_pipeline
 deploy_admin_ui &
 deploy_application_ui &
