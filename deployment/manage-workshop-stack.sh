@@ -4,7 +4,7 @@
 
 ## Import workshop configuration
 # This contains the create_workshop() and delete_workshop() functions
-FUNCTIONS=( _workshop-conf.sh _manage-workshop-stack.sh _workshop-shared-functions.sh _delete-workshop.sh )
+FUNCTIONS=( _workshop-conf.sh _manage-workshop-stack.sh _workshop-shared-functions.sh )
 for FUNCTION in "${FUNCTIONS[@]}"; do
     if [ -f $FUNCTION ]; then
         source $FUNCTION

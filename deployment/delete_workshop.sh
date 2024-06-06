@@ -2,6 +2,15 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
+FUNCTIONS=( _workshop-conf.sh _workshop-shared-functions.sh _delete-workshop.sh )
+for FUNCTION in "${FUNCTIONS[@]}"; do
+    if [ -f $FUNCTION ]; then
+        source $FUNCTION
+    else
+        echo "ERROR: $FUNCTION not found"
+    fi
+done
+
 TRAILS=( "saas-ops-ddb-access-trails" "saas-ops-management-trails" )
 STACKS_1=()
 STACKS_2=( "saas-operations-controlplane" "saas-operations-pipeline" "saasOpsWorkshop-saasOperationsDashboard" "${WORKSHOP_NAME}-C9")
