@@ -2,6 +2,8 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
+echo "Deleting workshop"
+
 FUNCTIONS=( _workshop-conf.sh _workshop-shared-functions.sh _delete-workshop.sh )
 for FUNCTION in "${FUNCTIONS[@]}"; do
     if [ -f $FUNCTION ]; then
@@ -38,3 +40,5 @@ delete_log_groups &
 delete_user_pools &
 delete_api_keys &
 wait_for_background_jobs
+
+echo "Workshop deleted"

@@ -23,7 +23,5 @@ create_workshop() {
 }
 
 delete_workshop() {
-    echo "Deleting workshop"
     ./delete-workshop.sh
-    echo "Workshop deleted"
 }
