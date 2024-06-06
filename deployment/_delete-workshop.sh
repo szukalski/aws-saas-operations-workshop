@@ -46,7 +46,7 @@ delete_tenant_stacks() {
 
         tenant_stacks=$(echo "$response" | jq -r '.StackSummaries[].StackName | select(. | test("^stack-*"))')
         for i in $tenant_stacks; do
-            delete_stack "$i"
+            delete_stack "$i" &
         done
 
         next_token=$(echo "$response" | jq '.NextToken')
@@ -56,6 +56,7 @@ delete_tenant_stacks() {
             break
         fi
     done
+    wait_for_background_jobs
     echo "Tenant stacks deleted."
 }
 
