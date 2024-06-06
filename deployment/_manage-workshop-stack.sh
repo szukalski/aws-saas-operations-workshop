@@ -24,11 +24,12 @@ create_workshop() {
 
 delete_workshop() {
     get_c9_id
-    echo "Deleting workshop resources"
+    aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
+    echo "Deleting workshop"
 
     TRAILS=( "saas-ops-ddb-access-trails" "saas-ops-management-trails" )
-    STACKS_1=( "saas-operations-controlplane")
-    STACKS_2=( "saas-operations-pipeline" "saasOpsWorkshop-saasOperationsDashboard")
+    STACKS_1=()
+    STACKS_2=( "saas-operations-controlplane" "saas-operations-pipeline" "saasOpsWorkshop-saasOperationsDashboard" "${WORKSHOP_NAME}-C9")
     CODECOMMIT_REPOS=( "saas-operations-workshop" )
 
     for TRAIL in "${TRAILS[@]}"; do
@@ -50,16 +51,6 @@ delete_workshop() {
     delete_user_pools &
     delete_api_keys &
     wait_for_background_jobs
-
-    echo "Resources deleted"
-    
-    aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
-
-    bootstrap_cdk
-    cd cloud9
-    echo "Starting C9 destroy..."
-    cdk destroy --all --force --context "workshop=$WORKSHOP_NAME"
-    echo "Done C9 destroy!"
 
     echo "Workshop deleted"
 }
