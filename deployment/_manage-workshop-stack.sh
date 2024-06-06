@@ -17,15 +17,14 @@ create_workshop() {
 
     replace_instance_profile $BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME
     run_ssm_command "cd ~/environment ; git clone --branch $REPO_BRANCH_NAME $REPO_URL || echo 'Repo already exists.'"
-    #run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./c9-init.sh $REPO_URL | tee .ws-init.log"
-    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./c9-create.sh $REPO_URL | tee .ws-create.log"
+    run_ssm_command "cd ~/environment/$REPO_NAME/deployment && ./create-workshop.sh $REPO_URL | tee .ws-create.log"
 
     replace_instance_profile $PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME
 }
 
 delete_workshop() {
     get_c9_id
-    ./c9-delete.sh
+    ./delete-workshop.sh
     
     aws ec2 create-tags --resources $C9_ID --tags "Key=Workshop,Value=${WORKSHOP_NAME}Old"
 

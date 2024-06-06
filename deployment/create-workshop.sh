@@ -4,7 +4,8 @@
 
 REPO_URL=$1
 source ./_workshop-conf.sh
-source ./_c9-create.sh
+source ./_workshop-shared-functions.sh
+source ./_create-workshop.sh
 
 ## Variables
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')

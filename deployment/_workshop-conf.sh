@@ -12,13 +12,3 @@ CDK_VERSION="2.142.1"
 BUILD_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/BuildInstanceProfileName"
 PARTICIPANT_C9_INSTANCE_PROFILE_PARAMETER_NAME="/"$WORKSHOP_NAME"/Cloud9/ParticipantInstanceProfileName"
 TARGET_USER="ec2-user"
-
-## Functions
-FUNCTIONS=( _workshop-shared-functions.sh )
-for FUNCTION in "${FUNCTIONS[@]}"; do
-    if [ -f $FUNCTION ]; then
-        source $FUNCTION
-    else
-        echo "ERROR: $FUNCTION not found"
-    fi
-done

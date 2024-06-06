@@ -2,7 +2,9 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-source ./_c9-delete.sh
+source ./_delete-workshop.sh
+source ./_workshop-shared-functions.sh
+
 echo "Deleting workshop resources"
 
 TRAILS=( "saas-ops-ddb-access-trails" "saas-ops-management-trails" )

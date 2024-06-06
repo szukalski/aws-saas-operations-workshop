@@ -4,6 +4,7 @@
 
 # Break when all background jobs are done
 wait_for_background_jobs {
+    echo "Waiting for background jobs to finish"
     while true; do
         sleep 5
         jobs_running=($(jobs -l | grep Running | awk '{print $2}'))
