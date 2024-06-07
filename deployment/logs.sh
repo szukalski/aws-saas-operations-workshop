@@ -11,12 +11,12 @@ if [[ ! -n $1 ]]; then
 fi
 
 while getopts b:t: option; do
-case "${option}"
-    in
-    b) aws logs tail --follow ${B};;
-    t) aws logs tail --follow ${T};;
-    \?)
-        echo "Invalid option: -${OPTARG}" >&2
-        exit;;
-
-exit 1
+    case "${option}"
+        in
+        b) aws logs tail --follow ${B};;
+        t) aws logs tail --follow ${T};;
+        \?)
+            echo "Invalid option: -${OPTARG}" >&2
+            exit;;
+    esac
+done
