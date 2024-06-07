@@ -18,3 +18,5 @@ case "${option}"
     \?)
         echo "Invalid option: -${OPTARG}" >&2
         exit;;
+
+exit 1
