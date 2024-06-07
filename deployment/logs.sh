@@ -12,9 +12,11 @@ fi
 
 case "${1}"
     in
-    b) aws logs tail --follow ${B};;
-    t) aws logs tail --follow ${T};;
+    -b) aws logs tail --follow ${B};;
+    -t) aws logs tail --follow ${T};;
     \?)
         echo "Invalid option: -${1}" >&2
         exit;;
 esac
+
+echo "End"
