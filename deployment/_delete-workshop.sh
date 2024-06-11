@@ -69,7 +69,6 @@ empty_bucket() {
                         --query="[{Objects: ${object_type}[].{Key:Key, VersionId:VersionId}}, NextToken]")"
             objects="$(jq -r '.[0]' <<<"$page")"
             next_token="$(jq -r '.[1]' <<<"$page")"
-            echo "Next:"$next_token
             case "$(jq -r .Objects <<<"$objects")" in
                 '[]'|null) break;;
                 *) opt=(--starting-token "$next_token")
