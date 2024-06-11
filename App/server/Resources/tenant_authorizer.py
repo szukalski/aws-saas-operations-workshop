@@ -102,21 +102,16 @@ def lambda_handler(event, context):
     logger.info("Provider name: "+provider_name)
     logins = {}
     logins[provider_name] = jwt_bearer_token
-    logger.info("Logins: "+logins)
-    logger.info("Identity pool: "+identitypool_id)
-    logger.info("User pool: "+userpool_id)
     # Lab 4 - REVIEW - Assume role
     identity_response = cognito_identity_client.get_id(
         AccountId=aws_account_id,
         IdentityPoolId=identitypool_id,
         Logins=logins
     )
-    logger.info("Identity response: "+identity_response)
     assumed_role = cognito_identity_client.get_credentials_for_identity(
         IdentityId=identity_response['IdentityId'],
         Logins=logins
     )
-    logger.info("Assumed role: "+assumed_role)
     credentials = assumed_role["Credentials"]
 
     # Lab 4 - REVIEW - Lambda authorizer output context

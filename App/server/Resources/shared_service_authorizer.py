@@ -104,18 +104,15 @@ def lambda_handler(event, context):
     provider_name = response["iss"][8:] # get rid of https://
     logins = {}
     logins[provider_name] = jwt_bearer_token
-    logger.info(logins)
     identity_response = cognito_identity_client.get_id(
         AccountId=aws_account_id,
         IdentityPoolId=identitypool_id,
         Logins=logins
     )
-    logger.info(identity_response)
     assumed_role = cognito_identity_client.get_credentials_for_identity(
         IdentityId=identity_response['IdentityId'],
         Logins=logins
     )
-    logger.info(assumed_role)
 
     credentials = assumed_role["Credentials"]
 
