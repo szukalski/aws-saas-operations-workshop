@@ -6,12 +6,12 @@
 wait_for_background_jobs() {
     echo "Waiting for background jobs to finish"
     while true; do
-        sleep $DELAY
         jobs_running=($(jobs -l | grep Running | awk '{print $2}'))
         if [ ${#jobs_running[@]} -eq 0 ]; then
             break
         fi
         echo "Jobs running: ${jobs_running[@]}"
+        sleep $DELAY
     done
 }
 
