@@ -10,7 +10,6 @@ stop_cloudtrail() {
     fi
     aws cloudtrail stop-logging --name "${1}"
     echo "CloudTrail ${1} stopped."
-    aws cloudtrail delete-trail --name "${1}"
 }
 
 delete_stack() {
@@ -60,13 +59,30 @@ delete_tenant_stacks() {
     echo "Tenant stacks deleted."
 }
 
+empty_bucket() {
+    local -r bucket="${1:?}"
+    echo "Emptying s3://${bucket}..."
+    for object_type in Versions DeleteMarkers; do
+        local opt=() next_token=""
+        while [[ "$next_token" != null ]]; do
+            page="$(aws s3api list-object-versions --bucket "$bucket" --output json --max-items 400 "${opt[@]}" \
+                        --query="[{Objects: ${object_type}[].{Key:Key, VersionId:VersionId}}, NextToken]")"
+            objects="$(jq -r '.[0]' <<<"$page")"
+            next_token="$(jq -r '.[1]' <<<"$page")"
+            echo "Next:"$next_token
+            case "$(jq -r .Objects <<<"$objects")" in
+                '[]'|null) break;;
+                *) opt=(--starting-token "$next_token")
+                   aws s3api delete-objects --bucket "$bucket" --delete "$objects" --no-cli-pager;;
+            esac
+        done
+    done
+}
+
 delete_bucket() {
     bucket=$1
     echo "Deleting bucket ${bucket}"
-    echo "Emptying s3://${bucket}..."
-    aws s3api delete-objects --bucket ${bucket} --delete "$(aws s3api list-object-versions --bucket ${bucket} --output=json --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')" --no-cli-pager
-    aws s3api delete-objects --bucket ${bucket} --delete "$(aws s3api list-object-versions --bucket ${bucket} --output=json --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')" --no-cli-pager
-    echo "deleting s3 bucket with name s3://${bucket}..."
+    empty_bucket ${bucket}
     aws s3 rb "s3://${bucket}"
     echo "Bucket deleted."
 }
