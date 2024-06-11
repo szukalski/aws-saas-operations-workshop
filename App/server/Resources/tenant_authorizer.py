@@ -29,11 +29,11 @@ def lambda_handler(event, context):
     if (token[0] != 'Bearer'):
         raise Exception('Authorization header should have a format Bearer <JWT> Token')
     jwt_bearer_token = token[1]
-    logger.info("TA:" + "Method ARN: " + event['methodArn'])
+    logger.info("Method ARN: " + event['methodArn'])
     
     #only to get tenant id to get user pool info
     unauthorized_claims = jwt.get_unverified_claims(jwt_bearer_token)
-    logger.info("TA:" + unauthorized_claims)
+    logger.info(unauthorized_claims)
 
     if(auth_manager.isSaaSProvider(unauthorized_claims['custom:userRole'])):
         userpool_id = user_pool_operation_user
@@ -47,7 +47,7 @@ def lambda_handler(event, context):
                 'tenantId': unauthorized_claims['custom:tenantId']
             }
         )
-        logger.info("TA:" + tenant_details)
+        logger.info(tenant_details)
         userpool_id = tenant_details['Item']['userPoolId']
         identitypool_id = tenant_details['Item']['identityPoolId']
         appclient_id = tenant_details['Item']['appClientId']
@@ -70,7 +70,7 @@ def lambda_handler(event, context):
         logger.error('Unauthorized')
         raise Exception('Unauthorized')
     else:
-        logger.info("TA:" + response)
+        logger.info(response)
         principal_id = response["sub"]
         user_name = response["cognito:username"]
         tenant_id = response["custom:tenantId"]
@@ -99,24 +99,24 @@ def lambda_handler(event, context):
     #   Generate STS credentials to be used for FGAC
     
     provider_name = response["iss"][8:] # get rid of https://
-    logger.info("TA:" + "Provider name: "+provider_name)
+    logger.info("Provider name: "+provider_name)
     logins = {}
     logins[provider_name] = jwt_bearer_token
-    logger.info("TA:" + "Logins: "+logins)
-    logger.info("TA:" + "Identity pool: "+identitypool_id)
-    logger.info("TA:" + "User pool: "+userpool_id)
+    logger.info("Logins: "+logins)
+    logger.info("Identity pool: "+identitypool_id)
+    logger.info("User pool: "+userpool_id)
     # Lab 4 - REVIEW - Assume role
     identity_response = cognito_identity_client.get_id(
         AccountId=aws_account_id,
         IdentityPoolId=identitypool_id,
         Logins=logins
     )
-    logger.info("TA:" + "Identity response: "+identity_response)
+    logger.info("Identity response: "+identity_response)
     assumed_role = cognito_identity_client.get_credentials_for_identity(
         IdentityId=identity_response['IdentityId'],
         Logins=logins
     )
-    logger.info("TA:" + "Assumed role: "+assumed_role)
+    logger.info("Assumed role: "+assumed_role)
     credentials = assumed_role["Credentials"]
 
     # Lab 4 - REVIEW - Lambda authorizer output context
@@ -155,7 +155,7 @@ def validateJWT(token, app_client_id, keys):
             key_index = i
             break
     if key_index == -1:
-        logger.info("TA:" + 'Public key not found in jwks.json')
+        logger.info('Public key not found in jwks.json')
         return False
     # construct the public key
     public_key = jwk.construct(keys[key_index])
@@ -166,22 +166,22 @@ def validateJWT(token, app_client_id, keys):
     decoded_signature = base64url_decode(encoded_signature.encode('utf-8'))
     # verify the signature
     if not public_key.verify(message.encode("utf8"), decoded_signature):
-        logger.info("TA:" + 'Signature verification failed')
+        logger.info('Signature verification failed')
         return False
-    logger.info("TA:" + 'Signature successfully verified')
+    logger.info('Signature successfully verified')
     # since we passed the verification, we can now safely
     # use the unverified claims
     claims = jwt.get_unverified_claims(token)
     # additionally we can verify the token expiration
     if time.time() > claims['exp']:
-        logger.info("TA:" + 'Token is expired')
+        logger.info('Token is expired')
         return False
     # and the Audience  (use claims['client_id'] if verifying an access token)
     if claims['aud'] != app_client_id:
-        logger.info("TA:" + 'Token was not issued for this audience')
+        logger.info('Token was not issued for this audience')
         return False
     # now we can use the claims
-    logger.info("TA:" + claims)
+    logger.info(claims)
     return claims
 
 
