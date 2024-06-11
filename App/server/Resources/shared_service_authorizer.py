@@ -29,11 +29,11 @@ def lambda_handler(event, context):
     if (token[0] != 'Bearer'):
         raise Exception('Authorization header should have a format Bearer <JWT> Token')
     jwt_bearer_token = token[1]
-    logger.info("Method ARN: " + event['methodArn'])
+    logger.info("SA" + "Method ARN: " + event['methodArn'])
     
     #only to get tenant id to get user pool info
     unauthorized_claims = jwt.get_unverified_claims(jwt_bearer_token)
-    logger.info(unauthorized_claims)
+    logger.info("SA" + unauthorized_claims)
 
     if(auth_manager.isSaaSProvider(unauthorized_claims['custom:userRole'])):
         userpool_id = user_pool_operation_user
@@ -48,7 +48,7 @@ def lambda_handler(event, context):
                 'tenantId': unauthorized_claims['custom:tenantId']
             }
         )
-        logger.info(tenant_details)
+        logger.info("SA" + tenant_details)
         userpool_id = tenant_details['Item']['userPoolId']
         identitypool_id = tenant_details['Item']['identityPoolId']
         appclient_id = tenant_details['Item']['appClientId']        
@@ -69,7 +69,7 @@ def lambda_handler(event, context):
         logger.error('Unauthorized')
         raise Exception('Unauthorized')
     else:
-        logger.info(response)
+        logger.info("SA" + response)
         principal_id = response["sub"]
         user_name = response["cognito:username"]
         tenant_id = response["custom:tenantId"]
@@ -104,18 +104,18 @@ def lambda_handler(event, context):
     provider_name = response["iss"][8:] # get rid of https://
     logins = {}
     logins[provider_name] = jwt_bearer_token
-    logger.info("Logins: " + logins)
+    logger.info("SA" + "Logins: " + logins)
     identity_response = cognito_identity_client.get_id(
         AccountId=aws_account_id,
         IdentityPoolId=identitypool_id,
         Logins=logins
     )
-    logger.info("Identity Response: " + identity_response)
+    logger.info("SA" + "Identity Response: " + identity_response)
     assumed_role = cognito_identity_client.get_credentials_for_identity(
         IdentityId=identity_response['IdentityId'],
         Logins=logins
     )
-    logger.info("Assumed Role: " + assumed_role)
+    logger.info("SA" + "Assumed Role: " + assumed_role)
 
     credentials = assumed_role["Credentials"]
 
@@ -148,7 +148,7 @@ def validateJWT(token, app_client_id, keys):
             key_index = i
             break
     if key_index == -1:
-        logger.info('Public key not found in jwks.json')
+        logger.info("SA" + 'Public key not found in jwks.json')
         return False
     # construct the public key
     public_key = jwk.construct(keys[key_index])
@@ -159,22 +159,22 @@ def validateJWT(token, app_client_id, keys):
     decoded_signature = base64url_decode(encoded_signature.encode('utf-8'))
     # verify the signature
     if not public_key.verify(message.encode("utf8"), decoded_signature):
-        logger.info('Signature verification failed')
+        logger.info("SA" + 'Signature verification failed')
         return False
-    logger.info('Signature successfully verified')
+    logger.info("SA" + 'Signature successfully verified')
     # since we passed the verification, we can now safely
     # use the unverified claims
     claims = jwt.get_unverified_claims(token)
     # additionally we can verify the token expiration
     if time.time() > claims['exp']:
-        logger.info('Token is expired')
+        logger.info("SA" + 'Token is expired')
         return False
     # and the Audience  (use claims['client_id'] if verifying an access token)
     if claims['aud'] != app_client_id:
-        logger.info('Token was not issued for this audience')
+        logger.info("SA" + 'Token was not issued for this audience')
         return False
     # now we can use the claims
-    logger.info(claims)
+    logger.info("SA" + claims)
     return claims
 
 
